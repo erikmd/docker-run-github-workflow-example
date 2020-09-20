@@ -24,7 +24,7 @@ jobs:
             set -o pipefail
             pwd
             ls -l
-            sudo chown -Rv coq:coq .  # Workaround a permission issue:
+            sudo chown -v coq:coq .  # Workaround a permission issue:
             # the container user has UID=GID=1000,
             # while the GHA workdir has (UID=1001, GID=116).
             # this issue does not occur when using opam; only in this use case.
@@ -32,10 +32,11 @@ jobs:
             opam list > artifacts/deps.txt
             coqc test.v 2>&1 | tee artifacts/artifact.txt
             curl --version
+            sudo chown -v 1001:116 .  # Revert the permissions back
       - name: Display artifacts
         run: |
           set -x
           ls -l
           cd artifacts
           cat deps.txt
-          cat artifacts.txt
+          cat artifact.txt

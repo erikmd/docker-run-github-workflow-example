@@ -35,6 +35,7 @@ jobs:
             sudo chown -v 1001:116 .  # Revert the permissions back
       - name: Display artifacts
         run: |
+          exec 2>&1  # to ensure (stdout,stderr)-sync (flushing issue)
           set -x
           ls -l
           cd artifacts

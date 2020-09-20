@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+    branches: ['master'] # forall push/merge in master
+  pull_request:
+    branches: ['**']  # forall submitted Pull Requests
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - 'coqorg/coq:dev'
+      fail-fast: false  # don't stop jobs if one fails
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Run docker-coq-action
+        uses: coq-community/docker-coq-action@v1
+        with:
+          opam_file: 'dummy.opam'
+          custom_image: ${{ matrix.image }}
+          custom_script: |
+            pwd
+            ls
+            opam list > deps.txt
+            coqc test.v 2>&1 | tee artifact.txt
+            curl --version
+      - name: Display artifacts
+        run: |
+          cat deps.txt
+          cat artifacts.txt

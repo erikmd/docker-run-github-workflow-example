@@ -21,17 +21,21 @@ jobs:
           opam_file: 'dummy.opam'
           custom_image: ${{ matrix.image }}
           custom_script: |
+            set -o pipefail
             pwd
-            ls
-            sudo mkdir -m 777 artifacts  # Fix some permission issue:
+            ls -l
+            sudo chown -Rv coq:coq .  # Workaround a permission issue:
             # the container user has UID=GID=1000,
             # while the GHA workdir has (UID=1001, GID=116).
             # this issue does not occur when using opam; only in this use case.
+            mkdir artifacts
             opam list > artifacts/deps.txt
             coqc test.v 2>&1 | tee artifacts/artifact.txt
             curl --version
       - name: Display artifacts
         run: |
+          set -x
+          ls -l
           cd artifacts
           cat deps.txt
           cat artifacts.txt
